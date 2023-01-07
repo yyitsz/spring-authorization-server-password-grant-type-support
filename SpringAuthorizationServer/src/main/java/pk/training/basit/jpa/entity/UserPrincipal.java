@@ -4,20 +4,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Basic;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Basic;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import pk.training.basit.jpa.audit.AuditDeletedDate;
 
 /**
- * The first two and most basic JPA mapping annotations are @javax.persistence.Entity and @javax.persistence.Table. @Entity marks a 
+ * The first two and most basic JPA mapping annotations are @jakarta.persistence.Entity and @jakarta.persistence.Table. @Entity marks a
  * class to indicate that it is an entity. Every entity must have this annotation. By default, an entity name is equal to the 
  * unqualified entity class name, so the following pk.training.basit.entities.Book class has an entity name of Author.
  * 
@@ -65,7 +65,7 @@ public class UserPrincipal implements UserDetails, CredentialsContainer, Cloneab
 	 * those entities. Every entity should have an ID, which can be one field (and thus a single column) or multiple fields (and thus
 	 * multiple columns). As a result, you have many different approaches for mapping an ID.
 	 * 
-	 * First, you can mark any JavaBean property with @javax.persistence.Id. This annotation can go on the private field or the 
+	 * First, you can mark any JavaBean property with @jakarta.persistence.Id. This annotation can go on the private field or the
 	 * public accessor method and indicates that the property is the entity’s surrogate key. The property may be any Java primitive, 
 	 * primitive wrapper, String, java.util.Date, java.sql.Date, java.math.BigInteger, or java.math.BigDecimal.
 	 * 
@@ -75,9 +75,9 @@ public class UserPrincipal implements UserDetails, CredentialsContainer, Cloneab
 	 * 
 	 * You can, whenever you want, create an entity with an ID that is manually generated and assigned. However, this is rarely 
 	 * desired because it requires extra, repetitive, unnecessary work. Typically, you want your entity IDs to be automatically 
-	 * generated in some manner. You can accomplish this using the @javax.persistence.GeneratedValue annotation. @GeneratedValue 
+	 * generated in some manner. You can accomplish this using the @jakarta.persistence.GeneratedValue annotation. @GeneratedValue
 	 * enables you to specify a generation strategy and, if necessary, a generator name. For example, the Book and Author entity IDs
-	 * use javax.persistence.GenerationType.IDENTITY to indicate that the database column the ID is stored in can generate its own 
+	 * use jakarta.persistence.GenerationType.IDENTITY to indicate that the database column the ID is stored in can generate its own
 	 * value automatically.
 	 * 
 	 * This is compatible with MySQL AUTO_INCREMENT columns, Microsoft SQL Server and Sybase IDENTITY columns, PostgreSQL SERIAL and 

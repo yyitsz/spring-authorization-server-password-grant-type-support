@@ -1,6 +1,6 @@
 package pk.training.basit.jpa.entity;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.7.6'
+	id 'org.springframework.boot' version '3.0.1'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id 'java'
 	id 'war'
@@ -19,7 +19,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	implementation group: 'org.webjars', name: 'webjars-locator', version: '0.46'
 	implementation group: 'org.webjars', name: 'bootstrap', version: '5.2.3'
 	implementation group: 'org.webjars', name: 'jquery', version: '3.6.1'

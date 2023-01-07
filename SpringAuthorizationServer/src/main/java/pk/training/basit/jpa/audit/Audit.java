@@ -2,9 +2,9 @@ package pk.training.basit.jpa.audit;
 
 import java.time.Instant;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.MappedSuperclass;
 
 import org.springframework.data.annotation.AccessType;
 import org.springframework.data.annotation.CreatedBy;

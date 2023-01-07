@@ -119,7 +119,7 @@ public interface UserPrincipalRepository extends CrudRepository<UserPrincipal, L
 	 * Assuming Person has an address property and that property’s type has a postalCode property of type PostalCode, Spring Data 
 	 * can find the people in the database with the given postal code. However, property expressions can create ambiguity in the 
 	 * matching algorithm. Spring Data greedily matches the property name before looking for a property expression, not unlike a 
-	 * regular expression might greedily match an “or more�? control character. The algorithm could match on a different property 
+	 * regular expression might greedily match an “or more control character. The algorithm could match on a different property
 	 * name than you intended, and then fail to find a property within that property’s type matching the property expression. For 
 	 * this reason, it’s best to always separate property expressions using an underscore:
 
@@ -128,7 +128,7 @@ public interface UserPrincipalRepository extends CrudRepository<UserPrincipal, L
 	 * This removes the ambiguity so that Spring Data matches on the correct property. You undoubtedly remember that method names 
 	 * begin with find...By, get...By, or read...By. These are introducing clauses, and By is a delimiter separating the introducing
 	 * clause and the criteria to match on. To a large extent, you can place whatever you want to between find, get, or read and By.
-	 * For example, to be more “plain language,�? you could name a method findBookByIsbn or findPeopleByFirstNameAndLastName. Book 
+	 * For example, to be more “plain language, you could name a method findBookByIsbn or findPeopleByFirstNameAndLastName. Book
 	 * and People are ignored in this case. However, if the word Distinct (matching that case) is in the introducing clause (such as
 	 * findDistinctBooksByAuthor), this triggers the special behavior of enabling the distinct flag on the underlying query. This 
 	 * may or may not apply to the storage medium in use, but for JPA or JdbcTemplate repositories, it’s the equivalent of using the
@@ -155,7 +155,7 @@ public interface UserPrincipalRepository extends CrudRepository<UserPrincipal, L
 		-- Like is similar to Contains, StartsWith, and EndsWith, except that value you provide should already contain the 
 		   appropriate wildcards (instead of Spring Data adding them for you). This gives you the flexibility to specify more 
 		   advanced patterns. NotLike simply negates Like. Example: findByTitleLike(String value) could be called with value 
-		   "%Catcher%Rye%" and would match “The Catcher in the Rye�? and “Catcher Brings Home Rye Bread.�?
+		   "%Catcher%Rye%" and would match “The Catcher in the Rye and “Catcher Brings Home Rye Bread.
 
 		-- Between and IsBetween indicate that the property should be between the two specified values. This means that you must 
 		   provide two parameters for this property criterion. You can use Between on any type that may be compared mathematically 

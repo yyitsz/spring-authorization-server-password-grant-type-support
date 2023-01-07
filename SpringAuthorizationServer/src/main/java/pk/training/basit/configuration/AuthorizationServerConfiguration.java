@@ -62,143 +62,149 @@ import pk.training.basit.oauth2.customizer.token.claims.impl.OAuth2TokenClaimsCu
 @Configuration(proxyBeanMethods = false)
 public class AuthorizationServerConfiguration {
 
-	private static final String CUSTOM_CONSENT_PAGE_URI = "/oauth2/consent";
-	
-	@Value("${oauth2.token.issuer}") 
-	private String tokenIssuer;
-	
-	@Bean
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-		
-		OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
-		
-		/**
-		http.apply(authorizationServerConfigurer.withObjectPostProcessor(new ObjectPostProcessor<OAuth2TokenEndpointFilter>() {
-					@Override
-					public <O extends OAuth2TokenEndpointFilter> O postProcess(O oauth2TokenEndpointFilter) {
-						oauth2TokenEndpointFilter.setAuthenticationConverter(new DelegatingAuthenticationConverter(
-								Arrays.asList(
-										new OAuth2AuthorizationCodeAuthenticationConverter(),
-										new OAuth2RefreshTokenAuthenticationConverter(),
-										new OAuth2ClientCredentialsAuthenticationConverter(),
-										new OAuth2ResourceOwnerPasswordAuthenticationConverter())));
-						return oauth2TokenEndpointFilter;
-					}
-				})
-		);
-		*/
-		http.apply(authorizationServerConfigurer.tokenEndpoint((tokenEndpoint) -> tokenEndpoint.accessTokenRequestConverter(
-			new DelegatingAuthenticationConverter(Arrays.asList(
-				new OAuth2AuthorizationCodeAuthenticationConverter(),
-				new OAuth2RefreshTokenAuthenticationConverter(),
-				new OAuth2ClientCredentialsAuthenticationConverter(),
-				new OAuth2ResourceOwnerPasswordAuthenticationConverter()))
-		)));
-		
-		authorizationServerConfigurer.authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI));
-		
-		RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
-		
-		http
-			.requestMatcher(endpointsMatcher)
-			.authorizeRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
-			.csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-			.apply(authorizationServerConfigurer)
-			.and()
-			.apply(new FederatedIdentityConfigurer());
-		
-		SecurityFilterChain securityFilterChain = http.formLogin(Customizer.withDefaults()).build();
-		
-		/**
-		 * Custom configuration for Resource Owner Password grant type. Current implementation has no support for Resource Owner 
-		 * Password grant type
-		 */
-		addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(http);
-		
-		return securityFilterChain;
-	}
-	
-	@Bean
-	public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-		JdbcOAuth2AuthorizationService service = new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-		JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper = new JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
-		
-		ObjectMapper objectMapper = new ObjectMapper();
-		ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
-		List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
-		objectMapper.registerModules(securityModules);
-		objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-		
+    private static final String CUSTOM_CONSENT_PAGE_URI = "/oauth2/consent";
+
+    @Value("${oauth2.token.issuer}")
+    private String tokenIssuer;
+
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
+
+        /**
+         http.apply(authorizationServerConfigurer.withObjectPostProcessor(new ObjectPostProcessor<OAuth2TokenEndpointFilter>() {
+        @Override public <O extends OAuth2TokenEndpointFilter> O postProcess(O oauth2TokenEndpointFilter) {
+        oauth2TokenEndpointFilter.setAuthenticationConverter(new DelegatingAuthenticationConverter(
+        Arrays.asList(
+        new OAuth2AuthorizationCodeAuthenticationConverter(),
+        new OAuth2RefreshTokenAuthenticationConverter(),
+        new OAuth2ClientCredentialsAuthenticationConverter(),
+        new OAuth2ResourceOwnerPasswordAuthenticationConverter())));
+        return oauth2TokenEndpointFilter;
+        }
+        })
+         );
+         */
+        http.apply(authorizationServerConfigurer.tokenEndpoint((tokenEndpoint) -> tokenEndpoint.accessTokenRequestConverter(
+                new DelegatingAuthenticationConverter(Arrays.asList(
+                        new OAuth2AuthorizationCodeAuthenticationConverter(),
+                        new OAuth2RefreshTokenAuthenticationConverter(),
+                        new OAuth2ClientCredentialsAuthenticationConverter(),
+                        new OAuth2ResourceOwnerPasswordAuthenticationConverter()))
+        )));
+
+        authorizationServerConfigurer.oidc(Customizer.withDefaults());
+
+        authorizationServerConfigurer.authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI));
+
+        RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
+
+        http
+                .securityMatcher(endpointsMatcher)
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
+                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+                .apply(authorizationServerConfigurer)
+                .and()
+                .apply(new FederatedIdentityConfigurer())
+                .and()
+                .formLogin(Customizer.withDefaults());
+
+
+        SecurityFilterChain securityFilterChain = http.build();
+
+        /**
+         * Custom configuration for Resource Owner Password grant type. Current implementation has no support for Resource Owner
+         * Password grant type
+         */
+        addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(http);
+
+
+
+        return securityFilterChain;
+    }
+
+    @Bean
+    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
+        JdbcOAuth2AuthorizationService service = new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+        JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper = new JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
+        List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
+        objectMapper.registerModules(securityModules);
+        objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
+
         // You will need to write the Mixin for your class so Jackson can marshall it.
-		objectMapper.addMixIn(UserAuthority.class, UserAuthorityMixin.class);
-		objectMapper.addMixIn(UserPrincipal.class, UserPrincipalMixin.class);
-		objectMapper.addMixIn(AuditDeletedDate.class, AuditDeletedDateMixin.class);
-		objectMapper.addMixIn(Long.class, LongMixin.class);
-		
-		rowMapper.setObjectMapper(objectMapper);
-		service.setAuthorizationRowMapper(rowMapper);
-		return service;
-	}
-	
-	@Bean
-	public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-		return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
-	}
-	
-	@Bean
-	public JWKSource<SecurityContext> jwkSource() {
-		RSAKey rsaKey = Jwks.generateRsa();
-		JWKSet jwkSet = new JWKSet(rsaKey);
-		return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
-	}
+        objectMapper.addMixIn(UserAuthority.class, UserAuthorityMixin.class);
+        objectMapper.addMixIn(UserPrincipal.class, UserPrincipalMixin.class);
+        objectMapper.addMixIn(AuditDeletedDate.class, AuditDeletedDateMixin.class);
+        objectMapper.addMixIn(Long.class, LongMixin.class);
 
-	@Bean
-	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
-	}
+        rowMapper.setObjectMapper(objectMapper);
+        service.setAuthorizationRowMapper(rowMapper);
+        return service;
+    }
 
-	@Bean
-	public AuthorizationServerSettings authorizationServerSettings() {
-		return AuthorizationServerSettings.builder().issuer(tokenIssuer).build();
-	}
-	
-	@Bean
+    @Bean
+    public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
+        return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
+    }
+
+    @Bean
+    public JWKSource<SecurityContext> jwkSource() {
+        RSAKey rsaKey = Jwks.generateRsa();
+        JWKSet jwkSet = new JWKSet(rsaKey);
+        return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+        return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+    }
+
+    @Bean
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder().issuer(tokenIssuer).build();
+    }
+
+    @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> buildJwtCustomizer() {
-		
-		JwtCustomizerHandler jwtCustomizerHandler = JwtCustomizerHandler.getJwtCustomizerHandler();
-		JwtCustomizer jwtCustomizer = new JwtCustomizerImpl(jwtCustomizerHandler);
+
+        JwtCustomizerHandler jwtCustomizerHandler = JwtCustomizerHandler.getJwtCustomizerHandler();
+        JwtCustomizer jwtCustomizer = new JwtCustomizerImpl(jwtCustomizerHandler);
         OAuth2TokenCustomizer<JwtEncodingContext> customizer = (context) -> {
-        	jwtCustomizer.customizeToken(context);
+            jwtCustomizer.customizeToken(context);
         };
-        
+
         return customizer;
     }
-	
-	@Bean
+
+    @Bean
     public OAuth2TokenCustomizer<OAuth2TokenClaimsContext> buildOAuth2TokenClaimsCustomizer() {
-		
-		OAuth2TokenClaimsCustomizer oauth2TokenClaimsCustomizer = new OAuth2TokenClaimsCustomizerImpl();
+
+        OAuth2TokenClaimsCustomizer oauth2TokenClaimsCustomizer = new OAuth2TokenClaimsCustomizerImpl();
         OAuth2TokenCustomizer<OAuth2TokenClaimsContext> customizer = (context) -> {
-        	oauth2TokenClaimsCustomizer.customizeTokenClaims(context);
+            oauth2TokenClaimsCustomizer.customizeTokenClaims(context);
         };
-        
+
         return customizer;
     }
-	
-	@SuppressWarnings("unchecked")
-	private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http) {
-		
-		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-		OAuth2AuthorizationService authorizationService = http.getSharedObject(OAuth2AuthorizationService.class);
-		OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator = http.getSharedObject(OAuth2TokenGenerator.class);
-		
-		OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider =
-				new OAuth2ResourceOwnerPasswordAuthenticationProvider(authenticationManager, authorizationService, tokenGenerator);
-		
-		// This will add new authentication provider in the list of existing authentication providers.
-		http.authenticationProvider(resourceOwnerPasswordAuthenticationProvider);
-		
-	}
-	
+
+    @SuppressWarnings("unchecked")
+    private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http) {
+
+        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+        OAuth2AuthorizationService authorizationService = http.getSharedObject(OAuth2AuthorizationService.class);
+        OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator = http.getSharedObject(OAuth2TokenGenerator.class);
+
+        OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider =
+                new OAuth2ResourceOwnerPasswordAuthenticationProvider(authenticationManager, authorizationService, tokenGenerator);
+
+        // This will add new authentication provider in the list of existing authentication providers.
+        http.authenticationProvider(resourceOwnerPasswordAuthenticationProvider);
+
+    }
+
 }
