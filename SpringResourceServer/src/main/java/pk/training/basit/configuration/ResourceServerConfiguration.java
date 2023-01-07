@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 import pk.training.basit.converter.jwt.CustomJwtGrantedAuthoritiesConverter;
 
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
 public class ResourceServerConfiguration {
