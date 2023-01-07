@@ -5,7 +5,7 @@ import org.springframework.util.Assert;
 
 public interface JwtService {
 
-	String USER_ID_CLAIM = "userId";
+	String USER_ID_CLAIM = "sub";
 	String EMAIL_CLAIM = "email";
 	String PRINCIPAL_USER_TYPE_CLAIM = "principalUserType";
 	
@@ -23,8 +23,8 @@ public interface JwtService {
 		return value ;
 	}
 	
-	static Long getUserId(Jwt jwt) {
-		return getClaim(jwt, USER_ID_CLAIM, Long.class);
+	static String getUserId(Jwt jwt) {
+		return getClaim(jwt, USER_ID_CLAIM, String.class);
 	}
 	
 	static String getEmail(Jwt jwt) {

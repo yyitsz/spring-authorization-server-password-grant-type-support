@@ -17,10 +17,10 @@ import pk.training.basit.converter.jwt.CustomJwtGrantedAuthoritiesConverter;
 @Configuration(proxyBeanMethods = false)
 public class ResourceServerConfiguration {
 
-    @Value("${jwk.set.uri}")
+    //@Value("${jwk.set.uri}")
     private String jwkSetUri;
 
-    @Bean
+    //@Bean
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
@@ -42,7 +42,9 @@ public class ResourceServerConfiguration {
                 //.mvcMatchers("/messages/**").access("hasAuthority('USER')")
                 .and()
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.decoder(jwtDecoder()).jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .jwt(jwt -> jwt
+                                //.decoder(jwtDecoder())
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 );
 
         return http.build();

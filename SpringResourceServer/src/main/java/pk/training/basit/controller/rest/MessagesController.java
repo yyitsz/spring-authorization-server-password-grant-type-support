@@ -14,7 +14,7 @@ public class MessagesController {
 	@GetMapping("/messages")
 	@PreAuthorize("hasAuthority('USER') or hasAuthority('message.read') ")
 	public String[] getMessages(@AuthenticationPrincipal Jwt jwt) {
-		Long userId = JwtService.getUserId(jwt);
+		String userId = JwtService.getUserId(jwt);
 		System.out.println(userId);
 		return new String[] {"Message 1", "Message 2", "Message 3"};
 	}
